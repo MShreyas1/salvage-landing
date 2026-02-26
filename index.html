@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salvage AI — Robotic Grading & Routing for Electronics Returns</title>
+  <meta name="description" content="Automate electronics return grading with robotic precision. Cut costs, eliminate fraud, and maximize recovery for refurbishers, recyclers, OEMs, 3PLs, and carriers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-card-hover: #1a1a26;
+      --border: #1e1e2e;
+      --text: #e4e4ed;
+      --text-muted: #8888a0;
+      --accent: #4f6ef7;
+      --accent-glow: rgba(79, 110, 247, 0.25);
+      --accent-light: #7b93fa;
+      --green: #34d399;
+      --orange: #f59e0b;
+      --red: #ef4444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 1rem 2rem;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--accent); }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--accent);
+      color: #fff !important;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: var(--accent-light); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content { max-width: 800px; position: relative; z-index: 1; }
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      background: rgba(79, 110, 247, 0.08);
+    }
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 1.5rem;
+    }
+    h1 .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 24px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 32px var(--accent-glow);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-card);
+    }
+
+    /* STATS BAR */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat {
+      background: var(--bg);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-weight: 500;
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 6rem 2rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 1rem;
+      line-height: 1.15;
+    }
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+    }
+
+    /* PAIN POINTS */
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .pain-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+    .pain-card:hover {
+      border-color: #2a2a3e;
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .pain-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .pain-icon.red { background: rgba(239, 68, 68, 0.12); }
+    .pain-icon.orange { background: rgba(245, 158, 11, 0.12); }
+    .pain-icon.blue { background: rgba(79, 110, 247, 0.12); }
+    .pain-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .pain-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* HOW IT WORKS */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .step {
+      position: relative;
+      padding: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.3s;
+    }
+    .step:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+    .step-num {
+      font-size: 3rem;
+      font-weight: 800;
+      color: rgba(79, 110, 247, 0.15);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+    .step h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .step p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* WHO WE SERVE */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .audience-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .audience-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .audience-card .icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .audience-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .audience-card p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* ROI SECTION */
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .roi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+    }
+    .roi-card .metric {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 0.25rem;
+    }
+    .roi-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .roi-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* CONTACT / CTA SECTION */
+    .cta-section {
+      background: linear-gradient(180deg, var(--bg) 0%, #0d0d18 100%);
+    }
+    .cta-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .cta-text h2 { margin-bottom: 1.5rem; }
+    .cta-text p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .trust-signals {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .trust-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    /* FORM */
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+    }
+    .form-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .form-card .form-sub {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #555568;
+    }
+    .form-group select option {
+      background: var(--bg-card);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-submit {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* SUCCESS STATE */
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 2rem 0;
+    }
+    .form-success.show { display: block; }
+    .form-success .check-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin: 0 auto 1rem;
+    }
+    .form-success h3 { margin-bottom: 0.5rem; }
+    .form-success p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      nav ul { display: none; }
+      .cta-wrapper {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      section { padding: 4rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Salvage<span>AI</span></div>
+    <ul>
+      <li><a href="#problem">The Problem</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#who">Who We Serve</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#contact" class="nav-cta">Get a Demo</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="badge">B2B Automation for Electronics Returns</div>
+      <h1>Stop Losing Money on <span class="highlight">Manual Grading</span></h1>
+      <p>Robotic grading and intelligent routing for returned phones and electronics. Process thousands of devices per hour with consistent, fraud-proof accuracy.</p>
+      <div class="hero-buttons">
+        <a href="#contact" class="btn-primary">Request a Demo</a>
+        <a href="#how" class="btn-secondary">See How It Works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-number">93%</div>
+      <div class="stat-label">Grading Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">5x</div>
+      <div class="stat-label">Faster Than Manual</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">40%</div>
+      <div class="stat-label">Cost Reduction</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Grading Fraud</div>
+    </div>
+  </div>
+
+  <!-- PAIN POINTS -->
+  <section id="problem">
+    <div class="container">
+      <div class="section-label">The Problem</div>
+      <h2>Returns Processing Is Broken</h2>
+      <p class="section-subtitle">If you're grading returned electronics by hand, you're bleeding margin at every step.</p>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="pain-icon red">$</div>
+          <h3>Grading Costs Are Crushing You</h3>
+          <p>Manual grading at $3–8 per device eats into already-thin margins. Labor shortages make it worse every quarter.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon orange">!</div>
+          <h3>Fraud Slips Through</h3>
+          <p>Inconsistent human grading means swapped parts, hidden damage, and misgraded devices go undetected — killing your liquidation value.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon blue">&gt;</div>
+          <h3>Routing Is a Guessing Game</h3>
+          <p>Without precise grading data, you can't optimally route devices to refurbish, resell, recycle, or part-out — leaving recovery dollars on the table.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" style="background: var(--bg-card);">
+    <div class="container">
+      <div class="section-label">How It Works</div>
+      <h2>From Dock to Decision in Seconds</h2>
+      <p class="section-subtitle">Our robotic grading cells process returned devices with machine-level precision and speed.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Ingest & Identify</h3>
+          <p>Devices are scanned and identified automatically — IMEI, model, carrier lock, iCloud status — no manual data entry.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Robotic Inspection</h3>
+          <p>Multi-point physical and functional testing: screen, battery health, cameras, sensors, water damage — all in under 90 seconds.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>AI Grading</h3>
+          <p>Our models assign consistent, auditable grades using your custom grading matrix. No more subjective calls.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Smart Routing</h3>
+          <p>Each device is instantly routed to refurbish, resell, recycle, or part-out — maximizing per-unit recovery value.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO WE SERVE -->
+  <section id="who">
+    <div class="container">
+      <div class="section-label">Who We Serve</div>
+      <h2>Built for the Reverse Supply Chain</h2>
+      <p class="section-subtitle">We work with companies already processing electronics returns at scale.</p>
+      <div class="audience-grid">
+        <div class="audience-card">
+          <div class="icon">&#x1f504;</div>
+          <h3>Refurbishers</h3>
+          <p>Grade faster, catch fraud, and increase yield on every pallet.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">&#x267b;</div>
+          <h3>Recyclers</h3>
+          <p>Identify high-value devices before shredding. Maximize material recovery.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">&#x1f4f1;</div>
+          <h3>OEM Trade-In Programs</h3>
+          <p>Automate trade-in grading for consistent customer payouts and lower disputes.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">&#x1f4e6;</div>
+          <h3>3PLs & Fulfillment</h3>
+          <p>Add automated grading as a value-added service for your electronics clients.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">&#x1f4f6;</div>
+          <h3>Carriers & Insurers</h3>
+          <p>Process device returns and claims with auditable, tamper-proof grading.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROI -->
+  <section id="results" style="background: var(--bg-card);">
+    <div class="container">
+      <div class="section-label">Results</div>
+      <h2>The ROI Speaks for Itself</h2>
+      <p class="section-subtitle">Our customers see measurable impact within the first 30 days.</p>
+      <div class="roi-grid">
+        <div class="roi-card">
+          <div class="metric">40–60%</div>
+          <h3>Reduction in Per-Device Grading Cost</h3>
+          <p>Replace expensive manual labor with consistent robotic throughput. Process more devices with fewer headcount.</p>
+        </div>
+        <div class="roi-card">
+          <div class="metric">15–25%</div>
+          <h3>Higher Recovery Value</h3>
+          <p>Precise grading means better routing — more devices get refurbished instead of recycled at scrap prices.</p>
+        </div>
+        <div class="roi-card">
+          <div class="metric">&lt; 6 mo</div>
+          <h3>Payback Period</h3>
+          <p>Most deployments hit full ROI within two quarters, driven by labor savings and increased liquidation revenue.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / CTA -->
+  <section id="contact" class="cta-section">
+    <div class="container">
+      <div class="cta-wrapper">
+        <div class="cta-text">
+          <div class="section-label">Get Started</div>
+          <h2>See What Automated Grading Can Do for Your Operation</h2>
+          <p>Book a 20-minute demo and we'll show you exactly how our robotic grading cells integrate into your existing returns workflow — with a custom ROI projection for your volume.</p>
+          <div class="trust-signals">
+            <div class="trust-item">
+              <div class="trust-check">&#10003;</div>
+              No commitment required
+            </div>
+            <div class="trust-item">
+              <div class="trust-check">&#10003;</div>
+              Custom ROI analysis for your operation
+            </div>
+            <div class="trust-item">
+              <div class="trust-check">&#10003;</div>
+              Integrates with existing WMS/ERP systems
+            </div>
+            <div class="trust-item">
+              <div class="trust-check">&#10003;</div>
+              Deploy in weeks, not months
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h3>Request a Demo</h3>
+          <p class="form-sub">Fill out the form and we'll reach out within 24 hours.</p>
+          <form id="contactForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input type="text" id="firstName" name="firstName" placeholder="Jane" required>
+              </div>
+              <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input type="text" id="lastName" name="lastName" placeholder="Smith" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Work Email *</label>
+              <input type="email" id="email" name="email" placeholder="jane@company.com" required>
+            </div>
+            <div class="form-group">
+              <label for="company">Company *</label>
+              <input type="text" id="company" name="company" placeholder="Your company name" required>
+            </div>
+            <div class="form-group">
+              <label for="role">Your Role</label>
+              <select id="role" name="role">
+                <option value="" disabled selected>Select your role</option>
+                <option value="operations">Operations / Warehouse</option>
+                <option value="supply-chain">Supply Chain / Logistics</option>
+                <option value="executive">Executive / C-Suite</option>
+                <option value="it">IT / Engineering</option>
+                <option value="procurement">Procurement</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="volume">Monthly Device Volume</label>
+              <select id="volume" name="volume">
+                <option value="" disabled selected>Select volume range</option>
+                <option value="under-1k">Under 1,000</option>
+                <option value="1k-10k">1,000 – 10,000</option>
+                <option value="10k-50k">10,000 – 50,000</option>
+                <option value="50k-plus">50,000+</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Anything else we should know?</label>
+              <textarea id="message" name="message" rows="3" placeholder="Current pain points, timeline, etc."></textarea>
+            </div>
+            <button type="submit" class="btn-primary form-submit">Request Demo</button>
+          </form>
+          <div class="form-success" id="formSuccess">
+            <div class="check-circle">&#10003;</div>
+            <h3>We've got your request!</h3>
+            <p>Our team will reach out within 24 hours to schedule your demo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 SalvageAI. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Form handling
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Collect form data
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      console.log('Form submission:', data);
+
+      // Show success state
+      this.style.display = 'none';
+      document.querySelector('.form-card .form-sub').style.display = 'none';
+      document.querySelector('.form-card h3').style.display = 'none';
+      document.getElementById('formSuccess').classList.add('show');
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
