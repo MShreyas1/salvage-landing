@@ -89,28 +89,16 @@
       position: relative;
       overflow: hidden;
     }
-    .page-hero::before {
-      content: '';
-      position: absolute;
-      top: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 800px;
-      height: 800px;
-      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-      pointer-events: none;
-    }
     .page-hero-content { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
     .badge {
       display: inline-block;
       padding: 0.35rem 1rem;
       border: 1px solid var(--border);
-      border-radius: 100px;
+      border-radius: 4px;
       font-size: 0.8rem;
-      color: var(--accent-light);
+      color: var(--text-muted);
       font-weight: 500;
       margin-bottom: 1.5rem;
-      background: rgba(79, 110, 247, 0.08);
     }
     h1 {
       font-size: clamp(2.25rem, 5vw, 3.25rem);
@@ -120,10 +108,7 @@
       margin-bottom: 1.25rem;
     }
     h1 .highlight {
-      background: linear-gradient(135deg, var(--accent), var(--accent-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--accent);
     }
     .page-hero p {
       font-size: 1.15rem;
@@ -167,13 +152,11 @@
       align-items: center;
       justify-content: center;
       margin: 0 auto 1.5rem;
-      box-shadow: 0 8px 40px var(--accent-glow);
-      transition: all 0.3s;
+      transition: all 0.2s;
       cursor: pointer;
     }
     .play-btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 12px 48px var(--accent-glow);
+      background: var(--accent-light);
     }
     .play-btn svg {
       width: 32px;
@@ -309,10 +292,7 @@
     .spec-value {
       font-size: 2rem;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--accent), var(--green));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--text);
       margin-bottom: 0.25rem;
     }
     .spec-card h3 {
@@ -353,12 +333,9 @@
       border: none;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 24px var(--accent-glow);
     }
     .btn-primary:hover {
       background: var(--accent-light);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 32px var(--accent-glow);
     }
 
     /* FOOTER */
